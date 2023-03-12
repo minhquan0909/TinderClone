@@ -8,7 +8,8 @@ const Card = props => {
         source={{
           uri: image,
         }}
-        style={styles.image}>
+        style={styles.imgBackground}
+        imageStyle={styles.img}>
         <View style={styles.cardInner}>
           <Text style={styles.name}>{name}</Text>
           <Text style={styles.bio}>{bio}</Text>
@@ -20,10 +21,8 @@ const Card = props => {
 const styles = StyleSheet.create({
   card: {
     width: '95%',
-    height: '75%',
+    height: '90%',
     shadowColor: '#000',
-    borderRadius: 10,
-    backgroundColor: 'white',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -33,11 +32,13 @@ const styles = StyleSheet.create({
 
     elevation: 5,
   },
-  image: {
+  imgBackground: {
     width: '100%',
     height: '100%',
-    borderRadius: 10,
     justifyContent: 'flex-end',
+  },
+  img: {
+    borderRadius: 10,
   },
   name: {
     fontSize: 38,
