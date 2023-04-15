@@ -13,9 +13,16 @@ import TinderIcon from './assets/icons/TinderIcon';
 import StarIcon from './assets/icons/StarIcon';
 import MessageIcon from './assets/icons/MessageIcon';
 import ProfileIcon from './assets/icons/ProfileIcon';
+import ProfileScreen from './src/screens/ProfileScreen';
+import {withAuthenticator} from '@aws-amplify/ui-react-native';
+import {Amplify} from 'aws-amplify';
+import awsconfig from './src/aws-exports';
+
+Amplify.configure(awsconfig);
 const ROTATION = 60;
 const SWIPE_VELOCITY = 800;
 const IconSize = '30px';
+
 const IconList = [
   {
     id: 1,
@@ -57,6 +64,7 @@ const App = () => {
         </View>
         {activeScreen === 'HOME' && <HomeScreen />}
         {activeScreen === 'MESSAGE' && <MatchesScreen />}
+        {activeScreen === 'PROFILE' && <ProfileScreen />}
       </View>
     </SafeAreaView>
   );
@@ -68,8 +76,8 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    // justifyContent: 'center',
+    // alignItems: 'center',
   },
   topNavigation: {
     flexDirection: 'row',
@@ -93,4 +101,4 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
 });
-export default App;
+export default withAuthenticator(App);

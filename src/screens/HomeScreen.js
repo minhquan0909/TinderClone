@@ -1,13 +1,14 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {StyleSheet, TouchableOpacity, View} from 'react-native';
-import Members from '../../assets/data/Members';
 import CrossIcon from '../../assets/icons/CrossIcon';
 import FlashIcon from '../../assets/icons/FlashIcon';
 import LoveIcon from '../../assets/icons/LoveIcon';
 import StarIcon from '../../assets/icons/StarIcon';
 import UndoIcon from '../../assets/icons/UndoIcon';
 import AnimatedStack from '../components/AnimatedStack';
+import {User, Match} from '../models';
 import Card from '../components/TinderCard';
+import {Auth, DataStore} from 'aws-amplify';
 const ROTATION = 60;
 const SWIPE_VELOCITY = 800;
 const IconSize = '30px';
@@ -34,16 +35,45 @@ const IconList = [
   },
 ];
 const HomeScreen = () => {
+  const [users, setUsers] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [me, setMe] = useState(null);
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const fetchedUsers = await DataStore.query(User);
+      const parsedUsers = JSON.parse(JSON.stringify(fetchedUsers));
+      setUsers(parsedUsers);
+    };
+    fetchUsers();
+  }, []);
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const userDB = await Auth.currentAuthenticatedUser();
+      const subID = userDB.attributes.sub;
+      const dbUsers = await DataStore.query(User, u => u.sub.eq(subID));
+      if (dbUsers.length < 0) {
+        return;
+      }
+      setMe(dbUsers[0]);
+    };
+    getCurrentUser();
+  }, []);
+  console.log(users);
   const onSwipeLeft = user => {
+    if (!user || !me) {
+      console.log(user);
+      return;
+    }
     console.warn('swipe left', user.name);
   };
   const onSwipeRight = user => {
+    DataStore.save(new Match({}));
     console.warn('swipe right', user.name);
   };
   return (
     <View style={styles.container}>
       <AnimatedStack
-        data={Members}
+        data={users}
         renderItem={({item}) => <Card member={item} />}
         onSwipeLeft={onSwipeLeft}
         onSwipeRight={onSwipeRight}

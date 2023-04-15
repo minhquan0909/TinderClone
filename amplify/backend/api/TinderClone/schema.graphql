@@ -1,0 +1,25 @@
+type Match @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  User1: User @hasOne
+  User2: User @hasOne
+  User1ID: String!
+  User2ID: String
+  isMatch: Boolean!
+}
+
+enum GenderEnum {
+  MALE
+  FEMALE
+  OTHER
+}
+
+type User @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  name: String!
+  image: String
+  bio: String!
+  gender: GenderEnum!
+  lookingFor: GenderEnum
+  sub: String!
+}
+ 

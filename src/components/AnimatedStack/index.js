@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, useWindowDimensions, View} from 'react-native';
+import {StyleSheet, Text, useWindowDimensions, View} from 'react-native';
 import {PanGestureHandler} from 'react-native-gesture-handler';
 import Animated, {
   interpolate,
@@ -61,27 +61,30 @@ const AnimatedStack = props => {
   const nopeStyle = useAnimatedStyle(() => ({
     opacity: interpolate(translateX.value, [0, -hiddenTranslateX / 5], [0, 1]),
   }));
-  const gestureHandler = useAnimatedGestureHandler({
-    onStart: (_, context) => {
-      context.startX = translateX.value;
+  const gestureHandler = useAnimatedGestureHandler(
+    {
+      onStart: (_, context) => {
+        context.startX = translateX.value;
+      },
+      onActive: (event, context) => {
+        translateX.value = context.startX + event.translationX;
+      },
+      onEnd: event => {
+        if (Math.abs(event.velocityX) < SWIPE_VELOCITY) {
+          translateX.value = withSpring(0);
+          return;
+        }
+        translateX.value = withSpring(
+          hiddenTranslateX * Math.sign(event.velocityX),
+          {},
+          () => runOnJS(setCurrentIndex)(currentIndex + 1),
+        );
+        const onSwipe = event.velocityX > 0 ? onSwipeRight : onSwipeLeft;
+        onSwipe && runOnJS(onSwipe)(currentProfile);
+      },
     },
-    onActive: (event, context) => {
-      translateX.value = context.startX + event.translationX;
-    },
-    onEnd: event => {
-      if (Math.abs(event.velocityX) < SWIPE_VELOCITY) {
-        translateX.value = withSpring(0);
-        return;
-      }
-      translateX.value = withSpring(
-        hiddenTranslateX * Math.sign(event.velocityX),
-        {},
-        () => runOnJS(setCurrentIndex)(currentIndex + 1),
-      );
-      const onSwipe = event.velocityX > 0 ? onSwipeRight : onSwipeLeft;
-      onSwipe && runOnJS(onSwipe)(currentProfile);
-    },
-  });
+    [currentProfile],
+  );
   useEffect(() => {
     translateX.value = 0;
     setNextIndex(currentIndex + 1);
@@ -95,7 +98,7 @@ const AnimatedStack = props => {
           </Animated.View>
         </View>
       )}
-      {currentProfile && (
+      {currentProfile ? (
         <PanGestureHandler onGestureEvent={gestureHandler}>
           <Animated.View style={[styles.animateCard, cardStyle]}>
             <Animated.Image
@@ -111,6 +114,10 @@ const AnimatedStack = props => {
             {renderItem({item: currentProfile})}
           </Animated.View>
         </PanGestureHandler>
+      ) : (
+        <View>
+          <Text>No more users</Text>
+        </View>
       )}
     </View>
   );
